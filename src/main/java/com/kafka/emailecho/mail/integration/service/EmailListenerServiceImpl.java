@@ -3,7 +3,6 @@ package com.kafka.emailecho.mail.integration.service;
 import com.sun.mail.imap.IMAPFolder;
 import jakarta.mail.MessagingException;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
 
 @Slf4j
 public class EmailListenerServiceImpl implements Runnable {

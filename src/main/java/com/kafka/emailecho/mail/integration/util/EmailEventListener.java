@@ -65,7 +65,7 @@ public class EmailEventListener extends MessageCountAdapter {
             try {
               log.info("New email received: " + message.getSubject());
               handleIncomingMessage(message);
-            }catch (Exception exception){
+            } catch (Exception exception) {
               handleException(exception);
             }
           }
@@ -91,7 +91,7 @@ public class EmailEventListener extends MessageCountAdapter {
     }
   }
 
-  private EmailResponse createEmailResponse(Message message){
+  private EmailResponse createEmailResponse(Message message) {
     try {
       EmailResponse emailResponse = new EmailResponse();
       emailResponse.setSubject(message.getSubject());
@@ -99,11 +99,11 @@ public class EmailEventListener extends MessageCountAdapter {
       emailResponse.setRecipients(Arrays.toString(message.getAllRecipients()));
       processAttachments(message, emailResponse);
       String bodyContent = getTextFromMessage(message);
-      emailResponse.setBody(bodyContent);
+      emailResponse.setBody(bodyContent.trim());
       return emailResponse;
-    }catch (Exception e){
+    } catch (Exception e) {
       handleException(e);
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,e.getMessage());
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
     }
   }
 
@@ -123,7 +123,8 @@ public class EmailEventListener extends MessageCountAdapter {
     }
   }
 
-  private void handleAttachment(BodyPart bodyPart, EmailResponse emailResponse) throws MessagingException, IOException {
+  private void handleAttachment(BodyPart bodyPart, EmailResponse emailResponse)
+      throws MessagingException, IOException {
     String fileName = bodyPart.getFileName();
     InputStream attachmentInputStream = bodyPart.getInputStream();
     byte[] attachmentBytes = readBytesFromInputStream(attachmentInputStream);
@@ -160,13 +161,16 @@ public class EmailEventListener extends MessageCountAdapter {
     return "";
   }
 
-  private String getTextFromMimeMultipart(MimeMultipart mimeMultipart) throws MessagingException, IOException {
+  private String getTextFromMimeMultipart(MimeMultipart mimeMultipart)
+      throws MessagingException, IOException {
     StringBuilder result = new StringBuilder();
+    boolean foundPlainText = false;
     for (int i = 0; i < mimeMultipart.getCount(); i++) {
       BodyPart bodyPart = mimeMultipart.getBodyPart(i);
-      if (bodyPart.isMimeType("text/plain")) {
+      if (bodyPart.isMimeType("text/plain") && !foundPlainText) {
         result.append("\n").append(bodyPart.getContent());
-      } else {
+        foundPlainText = true;
+      } else if (!foundPlainText) {
         result.append(parseBodyPart(bodyPart));
       }
     }
