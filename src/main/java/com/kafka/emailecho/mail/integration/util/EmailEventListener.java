@@ -1,6 +1,6 @@
 package com.kafka.emailecho.mail.integration.util;
 
-import com.kafka.emailecho.kafka.producer.KafkaProducer;
+import com.kafka.emailecho.kafka.producer.KafkaProducerService;
 import com.kafka.emailecho.mail.integration.model.EmailResponse;
 import com.kafka.emailecho.mail.integration.model.EmailResponse.FileDetails;
 import com.kafka.emailecho.mail.integration.repository.EmailListenerRepository;
@@ -46,7 +46,7 @@ public class EmailEventListener extends MessageCountAdapter {
   private EmailListenerRepository listenerRepository;
 
   @Autowired
-  private KafkaProducer kafkaProducer;
+  private KafkaProducerService kafkaProducerService;
 
   public EmailEventListener(Session session) {
     this.session = session;
@@ -89,7 +89,7 @@ public class EmailEventListener extends MessageCountAdapter {
   private void handleIncomingMessage(Message message) {
     try {
       EmailResponse emailResponse = createEmailResponse(message);
-      kafkaProducer.sendMessage(emailResponse);
+      kafkaProducerService.sendMessage(emailResponse);
       listenerRepository.save(emailResponse);
     } catch (Exception e) {
       handleException(e);
