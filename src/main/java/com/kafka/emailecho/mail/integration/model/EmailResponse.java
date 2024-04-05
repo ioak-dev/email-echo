@@ -22,6 +22,8 @@ public class EmailResponse {
 
   private FileDetails attachments;
 
+  private String emailResponseId;
+
 
   @Data
   @AllArgsConstructor

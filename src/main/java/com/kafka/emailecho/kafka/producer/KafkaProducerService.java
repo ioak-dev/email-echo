@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class KafkaProducerService {
 
+  private static final String TOPIC = "topic1";
   private final KafkaTemplate<String, Object> kafkaTemplate;
 
   public KafkaProducerService(KafkaTemplate<String, Object> kafkaTemplate) {
@@ -14,7 +15,17 @@ public class KafkaProducerService {
   }
 
   public void sendMessage(EmailResponse emailResponse) {
-    //Todo : Sending it to seperate partition
-    kafkaTemplate.send("topic1", emailResponse);
+    try {
+      EmailResponse mailResponseForPartition = new EmailResponse();
+      mailResponseForPartition.setFrom(emailResponse.getFrom());
+      mailResponseForPartition.setRecipients(emailResponse.getRecipients());
+      mailResponseForPartition.setSubject(emailResponse.getSubject());
+      mailResponseForPartition.setBody(emailResponse.getBody());
+      mailResponseForPartition.setEmailResponseId(emailResponse.getEmailResponseId());
+      kafkaTemplate.send(TOPIC, 0, null, mailResponseForPartition);
+      kafkaTemplate.send(TOPIC, 1, null, emailResponse.getAttachments());
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
   }
 }

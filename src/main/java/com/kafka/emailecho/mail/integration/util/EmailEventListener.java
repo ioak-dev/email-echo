@@ -22,6 +22,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Base64;
+import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -99,8 +102,9 @@ public class EmailEventListener extends MessageCountAdapter {
   private EmailResponse createEmailResponse(Message message) {
     try {
       EmailResponse emailResponse = new EmailResponse();
+      emailResponse.setEmailResponseId(UUID.randomUUID().toString());
       emailResponse.setSubject(message.getSubject());
-      emailResponse.setFrom(Arrays.toString(message.getFrom()));
+      emailResponse.setFrom(extractEmailAddress(Arrays.toString(message.getFrom())));
       emailResponse.setRecipients(Arrays.toString(message.getAllRecipients()));
       processAttachments(message, emailResponse);
       String bodyContent = getTextFromMessage(message);
@@ -203,6 +207,16 @@ public class EmailEventListener extends MessageCountAdapter {
 
   private void handleException(Exception exception) {
     log.error(exception.getMessage(), exception);
+  }
+
+
+  private String extractEmailAddress(String str) {
+    Pattern pattern = Pattern.compile("\\b[\\w\\.-]+@[\\w\\.-]+\\.\\w{2,4}\\b");
+    Matcher matcher = pattern.matcher(str);
+    if (matcher.find()) {
+      return matcher.group();
+    }
+    return null;
   }
 
 }
