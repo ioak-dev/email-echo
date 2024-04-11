@@ -7,6 +7,7 @@ import java.io.FileOutputStream;
 import java.util.Base64;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.kafka.annotation.DltHandler;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.annotation.PartitionOffset;
 import org.springframework.kafka.annotation.TopicPartition;
@@ -48,5 +49,12 @@ public class KafkaListenerService {
     } catch (Exception e) {
       e.printStackTrace();
     }
+  }
+
+  @DltHandler
+  public void handleError(EmailResponse response
+      , @Header(KafkaHeaders.RECEIVED_PARTITION) int partition){
+    mailSenderService.sendMailTemplate(response.getFrom(), response.getEmailResponseId());
+    log.info("Error occurred for partition "+ partition);
   }
 }

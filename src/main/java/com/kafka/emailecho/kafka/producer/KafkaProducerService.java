@@ -22,8 +22,8 @@ public class KafkaProducerService {
       mailResponseForPartition.setSubject(emailResponse.getSubject());
       mailResponseForPartition.setBody(emailResponse.getBody());
       mailResponseForPartition.setEmailResponseId(emailResponse.getEmailResponseId());
-      kafkaTemplate.send(TOPIC, 0, null, mailResponseForPartition);
-      kafkaTemplate.send(TOPIC, 1, null, emailResponse.getAttachments());
+      kafkaTemplate.send(TOPIC, 0, "", mailResponseForPartition);
+      kafkaTemplate.send(TOPIC, 1, "", emailResponse.getAttachments());
     } catch (Exception e) {
       e.printStackTrace();
     }
